@@ -1,7 +1,5 @@
 const User = require("../models/user");
 
-//Get /users
-
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
@@ -11,8 +9,6 @@ const getUsers = (req, res) => {
       return res.status(500).send({ message: err.message });
     });
 };
-
-//Post /users
 
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
@@ -27,8 +23,6 @@ const createUser = (req, res) => {
       return res.status(500).send({ message: err.message });
     });
 };
-
-//Get /userById
 
 const getUser = (req, res) => {
   const { userId } = req.params;

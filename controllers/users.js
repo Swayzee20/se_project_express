@@ -1,5 +1,8 @@
 const User = require("../models/user");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -14,10 +17,12 @@ const getUsers = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  console.log(name, avatar);
-  User.create({ name, avatar })
-    .then((user) => res.send(user))
+  const { name, avatar, email } = req.body;
+  bcrypt
+    .hash(req.body.password, 10)
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    //dont return password
+    .then((user) => res.send({ name, avatar, email }))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
@@ -48,4 +53,26 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser };
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((err) => {
+      console.error(err);
+      if (
+        err.message === "Illegal arguments: string, undefined" ||
+        "Incorrect email or password"
+      ) {
+        return res.status(BAD_REQUEST).send({ message: err.message });
+      }
+      return res.status(401).send({ message: err.message });
+    });
+};
+
+module.exports = { getUsers, createUser, getUser, login };

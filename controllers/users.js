@@ -75,4 +75,28 @@ const login = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser, login };
+const getCurrentUser = (req, res) => {
+  const userId = req.user._id;
+  const email = req.user.email;
+  console.log(email);
+  User.findById(userId)
+    .orFail()
+    .then((user) => {
+      const { name, avatar, email } = user;
+      res.send({ name, avatar, email });
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: err.message });
+      }
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+      }
+      return res
+        .status(DEFAULT)
+        .send({ message: "An error has occured on the server." });
+    });
+};
+
+module.exports = { getUsers, createUser, getUser, login, getCurrentUser };

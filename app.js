@@ -12,12 +12,12 @@ mongoose
   })
   .catch(console.error);
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "65ee6424f61cfa44680737cc",
-  };
-  next();
-});
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: "65ee6424f61cfa44680737cc",
+//   };
+//   next();
+// });
 app.use(express.json());
 app.use(
   express.urlencoded({

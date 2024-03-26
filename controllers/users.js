@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const user = require("../models/user");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -99,4 +100,29 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser, login, getCurrentUser };
+const updateProfile = (req, res) => {
+  const { name, avatar } = req.body;
+  User.findOneAndUpdate(
+    user,
+    { name, avatar },
+    {
+      new: true,
+      runValidators: true,
+      upsert: false,
+    },
+  )
+    .then((user) => res.send({ user }))
+    .catch((err) => {
+      console.error(err);
+      return res.status(DEFAULT).send({ message: err.message });
+    });
+};
+
+module.exports = {
+  getUsers,
+  createUser,
+  getUser,
+  login,
+  getCurrentUser,
+  updateProfile,
+};

@@ -33,26 +33,29 @@ const createClothingItem = (req, res) => {
 
 const deleteClothingItem = (req, res) => {
   const { itemId } = req.params;
-  console.log(req.user);
-  if (req.user._id === itemId) {
-    clothingItem
-      .findByIdAndDelete(itemId)
-      .orFail()
-      .then((item) => res.send(item))
-      .catch((err) => {
-        console.error(err);
-        if (err.name === "DocumentNotFoundError") {
-          return res.status(NOT_FOUND).send({ message: err.message });
-        }
-        if (err.name === "CastError") {
-          return res.status(BAD_REQUEST).send({ message: "Invalid data" });
-        }
-        return res
-          .status(DEFAULT)
-          .send({ message: "An error has occured on the server." });
-      });
-  }
-  return res.status(403).send({ message: "Cannot delete item" });
+  const userId = req.user._id;
+
+  clothingItem
+    .findByIdAndDelete(itemId)
+    .orFail()
+    .then((item) => {
+      if (userId === item.owner) {
+        res.send(item);
+      }
+      return;
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND).send({ message: err.message });
+      }
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+      }
+      return res
+        .status(DEFAULT)
+        .send({ message: "An error has occured on the server." });
+    });
 };
 
 const addLike = (req, res) => {

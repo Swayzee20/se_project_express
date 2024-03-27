@@ -22,12 +22,14 @@ const createUser = (req, res) => {
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
-    //dont return password
-    .then((user) => res.send({ name, avatar, email }))
+    .then(() => res.send({ name, avatar, email }))
     .catch((err) => {
-      console.error(err);
+      console.error(err.code);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+      }
+      if (err.code === 11000) {
+        return res.status(409).send({ message: "Invalid data" });
       }
       return res
         .status(DEFAULT)

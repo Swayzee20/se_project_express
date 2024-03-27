@@ -79,7 +79,6 @@ const login = (req, res) => {
 
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
-  const { email } = req.user;
   User.findById(userId)
     .orFail()
     .then((user) => {

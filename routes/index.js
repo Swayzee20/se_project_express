@@ -6,8 +6,8 @@ const auth = require("../middlewares/auth");
 const userRouter = require("./users");
 const clothingRouter = require("./clothingItems");
 
-router.use("/users", auth, userRouter);
-router.use("/items", auth, clothingRouter);
+router.use("/users", userRouter);
+router.use("/items", clothingRouter);
 router.post("/signup", createUser);
 router.post("/signin", login);
 router.use("*", (req, res) => {

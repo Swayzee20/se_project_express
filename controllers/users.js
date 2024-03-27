@@ -1,7 +1,13 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT,
+  INVALID_DATA,
+  ALREADY_EXISTS,
+} = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
@@ -28,7 +34,7 @@ const createUser = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });
       }
       if (err.code === 11000) {
-        return res.status(409).send({ message: "Invalid data" });
+        return res.status(ALREADY_EXISTS).send({ message: "Invalid data" });
       }
       return res
         .status(DEFAULT)
@@ -67,13 +73,13 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      if (
-        err.message === "Illegal arguments: string, undefined" ||
-        "Incorrect email or password"
-      ) {
+      if (err.message === "Illegal arguments: undefined, string") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
-      return res.status(401).send({ message: err.message });
+      if (err.message === "Incorrect email or password") {
+        return res.status(BAD_REQUEST).send({ message: err.message });
+      }
+      return res.status(DEFAULT).send({ message: err.message });
     });
 };
 
@@ -103,7 +109,7 @@ const updateProfile = (req, res) => {
   const { name, avatar } = req.body;
   const userId = req.user._id;
   User.findOneAndUpdate(
-    userId,
+    { _id: userId },
     { name, avatar },
     {
       new: true,
@@ -114,6 +120,9 @@ const updateProfile = (req, res) => {
     .then((user) => res.send({ user }))
     .catch((err) => {
       console.error(err);
+      if (err.name === "ValidationError") {
+        res.status(BAD_REQUEST).send({ message: err.message });
+      }
       return res.status(DEFAULT).send({ message: err.message });
     });
 };

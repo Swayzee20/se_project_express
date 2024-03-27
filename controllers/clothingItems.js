@@ -41,8 +41,9 @@ const deleteClothingItem = (req, res) => {
     .then((item) => {
       if (userId === item.owner) {
         res.send(item);
+      } else {
+        return res.status(403).send({ message: "Cannot delete item" });
       }
-      return;
     })
     .catch((err) => {
       console.error(err);

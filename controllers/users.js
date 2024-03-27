@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { BAD_REQUEST, NOT_FOUND, DEFAULT } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
-const user = require("../models/user");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -80,8 +79,7 @@ const login = (req, res) => {
 
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
-  const email = req.user.email;
-  console.log(email);
+  const { email } = req.user;
   User.findById(userId)
     .orFail()
     .then((user) => {

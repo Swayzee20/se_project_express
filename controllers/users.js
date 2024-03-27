@@ -101,8 +101,9 @@ const getCurrentUser = (req, res) => {
 
 const updateProfile = (req, res) => {
   const { name, avatar } = req.body;
+  const userId = req.user._id;
   User.findOneAndUpdate(
-    user,
+    userId,
     { name, avatar },
     {
       new: true,

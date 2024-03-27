@@ -44,7 +44,6 @@ const deleteClothingItem = (req, res) => {
       } else {
         return res.status(403).send({ message: "Cannot delete item" });
       }
-      return;
     })
     .catch((err) => {
       console.error(err);

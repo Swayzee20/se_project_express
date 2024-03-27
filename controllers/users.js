@@ -5,7 +5,6 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   DEFAULT,
-  INVALID_DATA,
   ALREADY_EXISTS,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");

@@ -6,6 +6,7 @@ const {
   NOT_FOUND,
   DEFAULT,
   ALREADY_EXISTS,
+  INVALID_DATA,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
@@ -33,7 +34,9 @@ const createUser = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });
       }
       if (err.code === 11000) {
-        return res.status(ALREADY_EXISTS).send({ message: "Invalid data" });
+        return res
+          .status(ALREADY_EXISTS)
+          .send({ message: "Email already exists" });
       }
       return res
         .status(DEFAULT)
@@ -76,7 +79,7 @@ const login = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
       if (err.message === "Incorrect email or password") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(INVALID_DATA).send({ message: err.message });
       }
       return res.status(DEFAULT).send({ message: err.message });
     });
@@ -120,7 +123,7 @@ const updateProfile = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({ message: err.message });
       }
       return res.status(DEFAULT).send({ message: err.message });
     });

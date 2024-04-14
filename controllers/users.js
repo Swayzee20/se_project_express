@@ -15,7 +15,6 @@ const getUsers = (req, res) => {
     .then((users) => res.send(users))
     .catch((err) => {
       console.error(err);
-      console.error(err);
       return res
         .status(DEFAULT)
         .send({ message: "An error has occured on the server." });
@@ -29,7 +28,7 @@ const createUser = (req, res) => {
     .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then(() => res.send({ name, avatar, email }))
     .catch((err) => {
-      console.error(err.code);
+      console.error(err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });
       }
@@ -71,7 +70,7 @@ const login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send({ token });
+      res.send({ token, name: user.name, avatar: user.avatar, id: user._id });
     })
     .catch((err) => {
       console.error(err);
@@ -90,8 +89,8 @@ const getCurrentUser = (req, res) => {
   User.findById(userId)
     .orFail()
     .then((user) => {
-      const { name, avatar, email } = user;
-      res.send({ name, avatar, email });
+      const { name, avatar, email, _id } = user;
+      res.send({ name, avatar, email, _id });
     })
     .catch((err) => {
       console.error(err);

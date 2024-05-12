@@ -4,6 +4,7 @@ const {
   NOT_FOUND,
   DEFAULT,
   NOT_AUTHORIZED,
+  NotFoundError,
 } = require("../utils/errors");
 
 const getClothingItems = (req, res) => {
@@ -36,7 +37,7 @@ const createClothingItem = (req, res) => {
     });
 };
 
-const deleteClothingItem = (req, res) => {
+const deleteClothingItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
@@ -72,7 +73,9 @@ const deleteClothingItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        // return res.status(NOT_FOUND).send({ message: "item Not Found" });
+        next(new NotFoundError("Item was not found"));
+        return;
       }
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });

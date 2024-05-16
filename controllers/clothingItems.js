@@ -2,6 +2,7 @@ const clothingItem = require("../models/clothingItem");
 const { NotFoundError } = require("../errors/not-found-error");
 const { BadRequestError } = require("../errors/bad-request-error");
 const { UnauthorizedError } = require("../errors/unauthorized-error");
+const { ForbiddenError } = require("../errors/forbidden-error");
 
 const getClothingItems = (req, res, next) => {
   clothingItem
@@ -64,7 +65,7 @@ const deleteClothingItem = (req, res, next) => {
             return next(err);
           });
       } else {
-        return next(new UnauthorizedError("Cannot delete item"));
+        return next(new ForbiddenError("Cannot delete item"));
       }
     })
     .catch((err) => {

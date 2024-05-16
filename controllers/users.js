@@ -1,6 +1,10 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const { NotFoundError } = require("../errors/not-found-error");
+const { BadRequestError } = require("../errors/bad-request-error");
+const { UnauthorizedError } = require("../errors/unauthorized-error");
+const { ConflictError } = require("../errors/confilct-error");
 const {
   BAD_REQUEST,
   NOT_FOUND,
@@ -15,9 +19,11 @@ const getUsers = (req, res) => {
     .then((users) => res.send(users))
     .catch((err) => {
       console.error(err);
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
+      // return res
+      //   .status(DEFAULT)
+      //   .send({ message: "An error has occured on the server." });
+      next(err);
+      return;
     });
 };
 
@@ -30,16 +36,21 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
+        return;
       }
       if (err.code === 11000) {
-        return res
-          .status(ALREADY_EXISTS)
-          .send({ message: "Email already exists" });
+        // return res
+        //   .status(ALREADY_EXISTS)
+        //   .send({ message: "Email already exists" });
+        next(new ConflictError("Email already exists"));
+        return;
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
+      // return res
+      //   .status(DEFAULT)
+      //   .send({ message: "An error has occured on the server." });
+      next(err);
+      return;
     });
 };
 
@@ -51,14 +62,16 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        // return res.status(NOT_FOUND).send({ message: err.message });
+        next(new NotFoundError("User not found"));
+        return;
       }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
+        return;
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
+      next(err);
+      return;
     });
 };
 
@@ -75,12 +88,15 @@ const login = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "Illegal arguments: undefined, string") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        next(new BadRequestError("Illegal arguments: undefined, string"));
+        return;
       }
       if (err.message === "Incorrect email or password") {
-        return res.status(INVALID_DATA).send({ message: err.message });
+        next(new UnauthorizedError("Incorrect email or password"));
+        return;
       }
-      return res.status(DEFAULT).send({ message: err.message });
+      next(err);
+      return;
     });
 };
 
@@ -95,14 +111,15 @@ const getCurrentUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        next(new NotFoundError("User not found"));
+        return;
       }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
+        return;
       }
-      return res
-        .status(DEFAULT)
-        .send({ message: "An error has occured on the server." });
+      next(err);
+      return;
     });
 };
 
@@ -122,9 +139,12 @@ const updateProfile = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        // return res.status(BAD_REQUEST).send({ message: err.message });
+        next(new BadRequestError(err.message));
+        return;
       }
-      return res.status(DEFAULT).send({ message: err.message });
+      next(err);
+      return;
     });
 };
 

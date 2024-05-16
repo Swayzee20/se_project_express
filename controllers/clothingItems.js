@@ -1,13 +1,7 @@
 const clothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  NOT_AUTHORIZED,
-  NotFoundError,
-  BadRequestError,
-  UnauthorizedError,
-} = require("../utils/errors");
+const { NotFoundError } = require("../errors/not-found-error");
+const { BadRequestError } = require("../errors/bad-request-error");
+const { UnauthorizedError } = require("../errors/unauthorized-error");
 
 const getClothingItems = (req, res, next) => {
   clothingItem

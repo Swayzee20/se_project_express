@@ -16,9 +16,9 @@ module.exports.validateCardBody = celebrate({
       "string.empty": 'The "name" field must be filled in',
     }),
 
-    weather: Joi.string().valid('hot', 'warm', 'cold').required().messages({
-      "string.empty": 'The "weather" field must be selected'
-    })
+    weather: Joi.string().valid("hot", "warm", "cold").required().messages({
+      "string.empty": 'The "weather" field must be selected',
+    }),
 
     imageUrl: Joi.string().required.custom(validateURL).message({
       "string.empty": 'The "imageUrl" field must be filled in',

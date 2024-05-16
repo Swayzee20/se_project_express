@@ -5,16 +5,9 @@ const { NotFoundError } = require("../errors/not-found-error");
 const { BadRequestError } = require("../errors/bad-request-error");
 const { UnauthorizedError } = require("../errors/unauthorized-error");
 const { ConflictError } = require("../errors/confilct-error");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  ALREADY_EXISTS,
-  INVALID_DATA,
-} = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
     .catch((err) => {
@@ -22,12 +15,11 @@ const getUsers = (req, res) => {
       // return res
       //   .status(DEFAULT)
       //   .send({ message: "An error has occured on the server." });
-      next(err);
-      return;
+      return next(err);
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email } = req.body;
   bcrypt
     .hash(req.body.password, 10)
@@ -36,25 +28,22 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        next(new BadRequestError("Invalid data"));
-        return;
+        return next(new BadRequestError("Invalid data"));
       }
       if (err.code === 11000) {
         // return res
         //   .status(ALREADY_EXISTS)
         //   .send({ message: "Email already exists" });
-        next(new ConflictError("Email already exists"));
-        return;
+        return next(new ConflictError("Email already exists"));
       }
       // return res
       //   .status(DEFAULT)
       //   .send({ message: "An error has occured on the server." });
-      next(err);
-      return;
+      return next(err);
     });
 };
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail()
@@ -63,19 +52,16 @@ const getUser = (req, res) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         // return res.status(NOT_FOUND).send({ message: err.message });
-        next(new NotFoundError("User not found"));
-        return;
+        return next(new NotFoundError("User not found"));
       }
       if (err.name === "CastError") {
-        next(new BadRequestError("Invalid data"));
-        return;
+        return next(new BadRequestError("Invalid data"));
       }
-      next(err);
-      return;
+      return next(err);
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -88,19 +74,18 @@ const login = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.message === "Illegal arguments: undefined, string") {
-        next(new BadRequestError("Illegal arguments: undefined, string"));
-        return;
+        return next(
+          new BadRequestError("Illegal arguments: undefined, string"),
+        );
       }
       if (err.message === "Incorrect email or password") {
-        next(new UnauthorizedError("Incorrect email or password"));
-        return;
+        return next(new UnauthorizedError("Incorrect email or password"));
       }
-      next(err);
-      return;
+      return next(err);
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
     .orFail()
@@ -111,19 +96,16 @@ const getCurrentUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        next(new NotFoundError("User not found"));
-        return;
+        return next(new NotFoundError("User not found"));
       }
       if (err.name === "CastError") {
-        next(new BadRequestError("Invalid data"));
-        return;
+        return next(new BadRequestError("Invalid data"));
       }
-      next(err);
-      return;
+      return next(err);
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
   const userId = req.user._id;
   User.findOneAndUpdate(
@@ -140,11 +122,9 @@ const updateProfile = (req, res) => {
       console.error(err);
       if (err.name === "ValidationError") {
         // return res.status(BAD_REQUEST).send({ message: err.message });
-        next(new BadRequestError(err.message));
-        return;
+        return next(new BadRequestError(err.message));
       }
-      next(err);
-      return;
+      return next(err);
     });
 };
 
